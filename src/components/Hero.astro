@@ -1,0 +1,44 @@
+---
+import { Image } from 'astro:assets';
+import bgImg from '../assets/images/Hero.png';
+import styles from './Hero.module.css';
+---
+
+<section class={styles.hero} id='top'>
+	<div class={styles.media} aria-hidden='true'>
+		<Image src={bgImg} alt={''} quality={'max'} priority />
+	</div>
+	<div class={styles.scrim} aria-hidden='true'></div>
+	<div class:list={[styles.orb, styles.orbOne]} aria-hidden='true'></div>
+	<div class:list={[styles.orb, styles.orbTwo]} aria-hidden='true'></div>
+
+	<div class:list={['container', styles.inner]}>
+		<div class:list={[styles.panel, 'glass']} data-reveal>
+			<p class:list={['eyebrow', styles.eyebrow]}>Версаль · банкетный зал</p>
+
+			<h1 class={styles.title}>
+				Светлый и уютный зал для дней, которые вы <em>запомните</em>.
+			</h1>
+
+			<p class={styles.lead}>
+				Свадьбы, дни рождения, корпоративы, семейные праздники — расскажите, сколько будет
+				гостей, и мы расставим зал так, как вы задумали. Без суеты и лишних правил.
+			</p>
+
+			<div class={styles.actions}>
+				<a class={styles.primary} href='#booking'>Узнать свободные даты</a>
+				<a class={styles.secondary} href='#events'>Посмотреть поводы</a>
+			</div>
+
+			<ul class={styles.facts}>
+				<li>До 100 гостей</li>
+				<li>Своя кухня</li>
+			</ul>
+		</div>
+	</div>
+
+	<a class={styles.scrollCue} href='#events' aria-label='Перейти к типам мероприятий'>
+		Вниз
+		<span aria-hidden='true'></span>
+	</a>
+</section>

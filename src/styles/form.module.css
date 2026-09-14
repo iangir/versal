@@ -1,0 +1,67 @@
+.field {
+	display: grid;
+	gap: 0.45rem;
+	min-width: 0;
+}
+
+.label {
+	font-size: 0.78rem;
+	font-weight: 500;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+	color: var(--color-desert-beige);
+}
+
+.control {
+	width: 100%;
+	padding: 0.8rem 1rem;
+	border-radius: 14px;
+	border: 1px solid var(--border-soft);
+	background: rgba(255, 255, 255, 0.62);
+	color: var(--color-text);
+	transition:
+		border-color 0.3s ease,
+		box-shadow 0.3s ease,
+		background-color 0.3s ease;
+}
+
+.control::placeholder {
+	color: rgba(92, 81, 72, 0.55);
+}
+
+.control:hover {
+	border-color: var(--color-desert-beige);
+}
+
+.control:focus,
+.control:focus-visible {
+	outline: none;
+	background: rgba(255, 255, 255, 0.9);
+	border-color: var(--color-light-gold);
+	box-shadow: 0 0 0 4px rgba(232, 213, 158, 0.35);
+}
+
+/**
+ * Button-based controls (custom select trigger, date picker trigger) reuse
+ * every `.control` rule through `composes`.
+ */
+.trigger {
+	composes: control;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	cursor: pointer;
+	text-align: left;
+}
+
+.trigger[aria-expanded="true"] {
+	background: rgba(255, 255, 255, 0.9);
+	border-color: var(--color-light-gold);
+	box-shadow: 0 0 0 4px rgba(232, 213, 158, 0.35);
+}
+
+.field[data-invalid="true"] .control {
+	border-color: rgba(164, 84, 75, 0.85);
+	box-shadow: 0 0 0 4px rgba(164, 84, 75, 0.14);
+}

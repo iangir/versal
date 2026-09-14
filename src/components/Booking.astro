@@ -1,0 +1,210 @@
+---
+import formStyles from '../styles/form.module.css';
+import styles from './Booking.module.css';
+import Select from './ui/Select.astro';
+import DatePicker from './ui/DatePicker.astro';
+
+const eventOptions = [
+	{ value: 'wedding', label: 'Свадьба' },
+	{ value: 'birthday', label: 'День рождения или годовщина' },
+	{ value: 'corporate', label: 'Корпоратив' },
+	{ value: 'family', label: 'Семейный праздник' },
+	{ value: 'other', label: 'Что-то другое' },
+];
+---
+
+<section class={styles.booking} id='booking'>
+	<div class:list={['container', styles.layout]}>
+		<div class={styles.aside} data-reveal>
+			<p class='eyebrow'>Бронирование</p>
+			<h2 class={styles.title}>Расскажите главное — дальше наша забота.</h2>
+			<p class={styles.lead}>
+				Одна короткая форма. В ответ пришлём свободные даты, стоимость зала и честно скажем,
+				поместится ли ваша компания.
+			</p>
+			<ul class={styles.points}>
+				<li>Отвечаем в тот же рабочий день, обычно в течение пары часов.</li>
+				<li>Депозит не нужен, чтобы придержать дату, пока вы думаете.</li>
+				<li>Покажем зал до того, как вы что-то решите.</li>
+			</ul>
+		</div>
+
+		<div class={styles.card} data-reveal style='--reveal-delay: 120ms'>
+			<form class={styles.form} id='booking-form' novalidate>
+				<div class:list={[formStyles.field, styles.full]} data-field>
+					<label class={formStyles.label} for='name'>Ваше имя</label>
+					<input
+						class={formStyles.control}
+						id='name'
+						name='name'
+						type='text'
+						autocomplete='name'
+						placeholder='Елена'
+						required
+					/>
+				</div>
+
+				<div class={formStyles.field} data-field>
+					<label class={formStyles.label} for='contact'>Телефон или почта</label>
+					<input
+						class={formStyles.control}
+						id='contact'
+						name='contact'
+						type='text'
+						autocomplete='tel'
+						placeholder='+7 900 000-00-00'
+						required
+					/>
+				</div>
+
+				<div class={formStyles.field} data-field>
+					<label class={formStyles.label} for='guests'>Сколько гостей</label>
+					<input
+						class={formStyles.control}
+						id='guests'
+						name='guests'
+						type='number'
+						min='1'
+						max='220'
+						step='1'
+						inputmode='numeric'
+						placeholder='80'
+						required
+					/>
+				</div>
+
+				<Select
+					name='type'
+					label='Тип мероприятия'
+					placeholder='Выберите'
+					options={eventOptions}
+					required
+				/>
+
+				<DatePicker name='date' label='Желаемая дата' required />
+
+				<div class:list={[formStyles.field, styles.full]} data-field>
+					<label class={formStyles.label} for='message'
+						>Что-то ещё, о чём нам стоит знать?</label
+					>
+					<textarea
+						class:list={[formStyles.control, styles.textarea]}
+						id='message'
+						name='message'
+						rows='3'
+						placeholder='Живая музыка, питание, оформление, время…'></textarea>
+				</div>
+
+				<button class={styles.submit} type='submit'>
+					<span>Отправить заявку</span>
+				</button>
+
+				<p class={styles.status} id='form-status' role='status' aria-live='polite'></p>
+
+				<p class={styles.fine}>
+					Отправляя форму, вы соглашаетесь, что мы свяжемся с вами по поводу праздника. И
+					только по этому поводу.
+				</p>
+			</form>
+		</div>
+	</div>
+</section>
+
+<script>
+	const form = document.getElementById('booking-form') as HTMLFormElement | null;
+	const status = document.getElementById('form-status');
+	const button = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+	const buttonLabel = button?.querySelector('span') ?? null;
+
+	const setStatus = (message: string, state: 'success' | 'error' | '') => {
+		if (!status) return;
+		status.textContent = message;
+		if (state) status.dataset.state = state;
+		else delete status.dataset.state;
+	};
+
+	const clearErrors = () => {
+		form?.querySelectorAll<HTMLElement>('[data-field][data-invalid="true"]').forEach(
+			(field) => delete field.dataset.invalid,
+		);
+	};
+
+	const markInvalid = (control: HTMLElement) => {
+		const field = control.closest<HTMLElement>('[data-field]');
+		if (field) field.dataset.invalid = 'true';
+		return field;
+	};
+
+	/** Native controls plus the hidden inputs behind the custom controls. */
+	const findInvalid = (): { field: HTMLElement | null; control: HTMLElement } | null => {
+		clearErrors();
+		let first: { field: HTMLElement | null; control: HTMLElement } | null = null;
+
+		form?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+			'input:not([type="hidden"]), textarea',
+		).forEach((control) => {
+			if (control.checkValidity()) return;
+			const field = markInvalid(control);
+			if (!first) first = { field, control };
+		});
+
+		form?.querySelectorAll<HTMLInputElement>('input[type="hidden"][data-custom-input]').forEach(
+			(control) => {
+				if (!control.required || control.value) return;
+				const field = markInvalid(control);
+				if (!first) first = { field, control };
+			},
+		);
+
+		return first;
+	};
+
+	form?.addEventListener('submit', (event) => {
+		event.preventDefault();
+
+		const invalid = findInvalid();
+		if (invalid) {
+			setStatus('Осталось заполнить пару полей.', 'error');
+			const target =
+				invalid.field?.querySelector<HTMLElement>('button, input, textarea') ??
+				invalid.control;
+			target.focus();
+			return;
+		}
+
+		const data = new FormData(form);
+		const name = String(data.get('name') ?? '')
+			.trim()
+			.split(' ')[0];
+
+		if (button) {
+			button.disabled = true;
+			if (buttonLabel) buttonLabel.textContent = 'Отправляем…';
+		}
+		setStatus('', '');
+
+		// Бэкенда пока нет — этот блок заменяет реальный запрос.
+		window.setTimeout(() => {
+			setStatus(
+				`Спасибо${name ? `, ${name}` : ''}! Заявка у нас — свяжемся с вами сегодня.`,
+				'success',
+			);
+			form.reset();
+			form.querySelectorAll<HTMLInputElement>('input[data-custom-input]').forEach((control) =>
+				control.dispatchEvent(new Event('input', { bubbles: true })),
+			);
+			if (button) {
+				button.disabled = false;
+				if (buttonLabel) buttonLabel.textContent = 'Отправить заявку';
+			}
+		}, 700);
+	});
+
+	// Убираем подсказку об ошибке, как только посетитель начал исправлять.
+	form?.addEventListener('input', (event) => {
+		const target = event.target as HTMLElement | null;
+		const field = target?.closest<HTMLElement>('[data-field]');
+		if (field?.dataset.invalid === 'true') delete field.dataset.invalid;
+		if (status?.dataset.state === 'error') setStatus('', '');
+	});
+</script>

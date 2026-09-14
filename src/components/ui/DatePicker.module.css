@@ -1,0 +1,195 @@
+.wrap {
+  position: relative;
+}
+
+.value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.value[data-empty='true'] {
+  color: rgba(92, 81, 72, 0.55);
+}
+
+.icon {
+  flex: none;
+  width: 1.15rem;
+  color: var(--color-desert-beige);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wrap[data-open='true'] .icon {
+  transform: translateY(-2px);
+}
+
+/* Calendar ------------------------------------------------------------- */
+
+.panel {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  left: auto;
+  top: calc(100% + 0.5rem);
+  width: max(100%, 18.5rem);
+  max-width: min(22rem, calc(100vw - 2.75rem));
+  padding: 0.9rem;
+  border-radius: 20px;
+  background: rgba(251, 249, 242, 0.94);
+  border: 1px solid var(--border-glass);
+  box-shadow:
+    0 28px 54px -28px rgba(30, 25, 22, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  animation: panelIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.month {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.02rem;
+  font-weight: 500;
+}
+
+.nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.nav svg {
+  width: 0.5rem;
+}
+
+.nav:hover {
+  background: var(--color-champagne);
+  color: var(--color-text);
+  transform: translateY(-1px);
+}
+
+.weekdays,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.15rem;
+}
+
+.weekdays {
+  margin-bottom: 0.25rem;
+}
+
+.weekdays span {
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-desert-beige);
+}
+
+.days [data-day] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-height: 2.1rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    background-color 0.22s ease,
+    color 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.22s ease;
+}
+
+.days [data-day]:hover:not(:disabled) {
+  background: var(--color-champagne);
+  transform: translateY(-1px);
+}
+
+.days [data-day]:disabled {
+  color: rgba(92, 81, 72, 0.32);
+  cursor: not-allowed;
+}
+
+.days [data-day][data-today='true'] {
+  border-color: var(--border-soft);
+}
+
+.days [data-day][aria-selected='true'] {
+  background: var(--color-light-gold);
+  border-color: var(--color-light-gold);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* Keyboard focus uses the real focus ring, so only soften hover states. */
+.days [data-day]:focus-visible {
+  outline: 2px solid var(--color-desert-beige);
+  outline-offset: 2px;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.7rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.link:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

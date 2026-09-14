@@ -1,0 +1,270 @@
+---
+import formStyles from '../../styles/form.module.css';
+import styles from './Select.module.css';
+
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  name: string;
+  label: string;
+  options: SelectOption[];
+  placeholder?: string;
+  required?: boolean;
+}
+
+const {
+  name,
+  label,
+  options,
+  placeholder = 'Выберите',
+  required = false,
+} = Astro.props;
+
+const triggerId = `${name}-trigger`;
+const panelId = `${name}-listbox`;
+---
+
+<div class:list={[formStyles.field, styles.field]} data-field>
+  <label class={formStyles.label} id={`${name}-label`} for={triggerId}>
+    {label}
+  </label>
+
+  <input
+    type="hidden"
+    name={name}
+    id={name}
+    data-custom-input
+    required={required}
+  />
+
+  <div class={styles.wrap} data-select data-open="false">
+    <button
+      type="button"
+      id={triggerId}
+      class={formStyles.trigger}
+      role="combobox"
+      aria-haspopup="listbox"
+      aria-expanded="false"
+      aria-controls={panelId}
+      aria-labelledby={`${name}-label`}
+      data-select-trigger
+    >
+      <span
+        class={styles.value}
+        data-select-value
+        data-placeholder={placeholder}
+        data-empty="true">{placeholder}</span
+      >
+      <svg class={styles.chevron} viewBox="0 0 12 8" aria-hidden="true" focusable="false">
+        <path
+          d="M1 1.5 6 6.5l5-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+    </button>
+
+    <div
+      class={styles.panel}
+      id={panelId}
+      role="listbox"
+      aria-labelledby={`${name}-label`}
+      hidden
+      data-select-panel
+    >
+      {
+        options.map((option) => (
+          <div
+            class={styles.option}
+            role="option"
+            aria-selected="false"
+            data-value={option.value}
+          >
+            <span>{option.label}</span>
+            <svg class={styles.check} viewBox="0 0 14 11" aria-hidden="true" focusable="false">
+              <path
+                d="M1 5.6 4.8 9.4 13 1.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-select]').forEach((root) => {
+    const trigger = root.querySelector<HTMLButtonElement>('[data-select-trigger]');
+    const panel = root.querySelector<HTMLElement>('[data-select-panel]');
+    const valueEl = root.querySelector<HTMLElement>('[data-select-value]');
+    const input = root
+      .closest<HTMLElement>('[data-field]')
+      ?.querySelector<HTMLInputElement>('input[data-custom-input]');
+
+    if (!trigger || !panel || !valueEl || !input) return;
+
+    const options = Array.from(panel.querySelectorAll<HTMLElement>('[role="option"]'));
+    if (!panel.id) panel.id = `select-${Math.random().toString(36).slice(2, 8)}`;
+    options.forEach((option, index) => {
+      option.id = `${panel.id}-option-${index}`;
+    });
+
+    let activeIndex = -1;
+
+    const placeholder = valueEl.dataset.placeholder ?? '';
+    const isOpen = () => root.dataset.open === 'true';
+    const selectedIndex = () =>
+      options.findIndex((option) => option.dataset.value === input.value);
+    const labelOf = (option: HTMLElement) => option.textContent?.trim() ?? '';
+
+    const setActive = (index: number) => {
+      if (index < 0 || index >= options.length || index === activeIndex) return;
+      if (activeIndex >= 0 && options[activeIndex]) {
+        delete options[activeIndex].dataset.active;
+      }
+      activeIndex = index;
+      const option = options[index];
+      option.dataset.active = 'true';
+      trigger.setAttribute('aria-activedescendant', option.id);
+      option.scrollIntoView({ block: 'nearest' });
+    };
+
+    const openPanel = () => {
+      panel.hidden = false;
+      root.dataset.open = 'true';
+      trigger.setAttribute('aria-expanded', 'true');
+      const start = selectedIndex();
+      setActive(start >= 0 ? start : 0);
+    };
+
+    const closePanel = (refocus = false) => {
+      panel.hidden = true;
+      root.dataset.open = 'false';
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.removeAttribute('aria-activedescendant');
+      if (activeIndex >= 0 && options[activeIndex]) {
+        delete options[activeIndex].dataset.active;
+      }
+      activeIndex = -1;
+      if (refocus) trigger.focus();
+    };
+
+    const selectOption = (index: number) => {
+      const option = options[index];
+      if (!option) return;
+
+      input.value = option.dataset.value ?? '';
+      valueEl.textContent = labelOf(option);
+      delete valueEl.dataset.empty;
+      options.forEach((item, i) => {
+        item.setAttribute('aria-selected', i === index ? 'true' : 'false');
+      });
+
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      closePanel(true);
+    };
+
+    /**
+     * Keep the visible label in sync with the hidden input: on first paint,
+     * after form.reset(), and whenever other code writes the value.
+     */
+    const sync = () => {
+      const index = selectedIndex();
+      if (index >= 0) {
+        valueEl.textContent = labelOf(options[index]);
+        delete valueEl.dataset.empty;
+      } else {
+        valueEl.textContent = placeholder;
+        valueEl.dataset.empty = 'true';
+      }
+      options.forEach((option, i) => {
+        option.setAttribute('aria-selected', i === index ? 'true' : 'false');
+      });
+    };
+
+    input.addEventListener('input', sync);
+    input.form?.addEventListener('reset', () => {
+      window.setTimeout(() => {
+        // У скрытого input значение по умолчанию берётся из атрибута,
+        // поэтому очищаем его явно — иначе reset вернёт прежний выбор.
+        input.value = '';
+        sync();
+      }, 0);
+    });
+    sync();
+
+    trigger.addEventListener('click', () => {
+      if (isOpen()) closePanel();
+      else openPanel();
+    });
+
+    trigger.addEventListener('keydown', (event) => {
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          if (isOpen()) setActive(activeIndex + 1);
+          else openPanel();
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          if (isOpen()) setActive(activeIndex - 1);
+          else openPanel();
+          break;
+        case 'Home':
+          if (isOpen()) {
+            event.preventDefault();
+            setActive(0);
+          }
+          break;
+        case 'End':
+          if (isOpen()) {
+            event.preventDefault();
+            setActive(options.length - 1);
+          }
+          break;
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          if (isOpen()) {
+            if (activeIndex >= 0) selectOption(activeIndex);
+          } else {
+            openPanel();
+          }
+          break;
+        case 'Escape':
+          if (isOpen()) {
+            event.preventDefault();
+            closePanel();
+          }
+          break;
+        case 'Tab':
+          if (isOpen()) closePanel();
+          break;
+        default:
+          break;
+      }
+    });
+
+    options.forEach((option, index) => {
+      option.addEventListener('click', () => selectOption(index));
+      option.addEventListener('mousemove', () => setActive(index));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!isOpen()) return;
+      if (event.target instanceof Node && root.contains(event.target)) return;
+      closePanel();
+    });
+  });
+</script>

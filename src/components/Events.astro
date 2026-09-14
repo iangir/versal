@@ -1,0 +1,78 @@
+---
+import { Image } from 'astro:assets';
+import img2 from '../assets/images/events2.jpeg';
+import img3 from '../assets/images/events3.jpg';
+import img1 from '../assets/images/events4.png';
+import img4 from '../assets/images/XXXL.webp';
+import styles from './Events.module.css';
+
+const events = [
+	{
+		index: '01',
+		title: 'Свадьбы',
+		text: 'Места хватит на весь список гостей, стол для торта найдётся, а танцевать можно, пока играет музыка.',
+		image: img1,
+	},
+	{
+		index: '02',
+		title: 'Дни рождения и годовщины',
+		text: 'Круглые даты, небольшие уютные ужины, вечеринки-сюрпризы — всё устроим просто, а вам останется радоваться.',
+		image: img2,
+	},
+	{
+		index: '03',
+		title: 'Корпоративы',
+		text: 'Выездные встречи, годовые праздники и давно назревшие командные ужины — с местом для экрана, микрофона и тихого уголка.',
+		image: img3,
+	},
+	{
+		index: '04',
+		title: 'Семья и друзья',
+		text: 'Крестины, встречи, проводы и поводы, которым повод не нужен. Тот же зал — ваши правила.',
+		image: img4,
+	},
+];
+---
+
+<section class={styles.events} id='events'>
+	<div class='container'>
+		<header class={styles.head} data-reveal>
+			<div>
+				<p class='eyebrow'>Типы мероприятий</p>
+				<h2 class={styles.title}>Что бы вы ни отмечали, зал подстроится под вас.</h2>
+			</div>
+			<p class={styles.intro}>
+				Четыре повода, по которым к нам приходят чаще всего. Можно смешивать, менять или
+				придумать что-то своё.
+			</p>
+		</header>
+
+		<div class={styles.grid}>
+			{
+				events.map((event) => (
+					<article class={styles.card} data-reveal>
+						<div class={styles.photo} aria-hidden='true'>
+							<Image src={event.image} alt='' quality={'mid'} />
+						</div>
+						<div class={styles.shade} aria-hidden='true' />
+						<div class={styles.body}>
+							<span class={styles.index}>{event.index}</span>
+							<h3 class={styles.cardTitle}>{event.title}</h3>
+							<p class={styles.cardText}>{event.text}</p>
+						</div>
+					</article>
+				))
+			}
+		</div>
+
+		<div class={styles.note} data-reveal>
+			<p>
+				<strong>Не уверены, что все поместятся?</strong> Пришлите примерное число гостей — скажем
+				честно.
+			</p>
+			<a class={styles.noteLink} href='#booking'>
+				Оставить заявку <span aria-hidden='true'>&rarr;</span>
+			</a>
+		</div>
+	</div>
+</section>

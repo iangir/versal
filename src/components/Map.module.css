@@ -1,0 +1,290 @@
+.map {
+	position: relative;
+	padding: clamp(2rem, 6vw, 4rem) 0 clamp(4.5rem, 9vw, 7rem);
+	background: linear-gradient(to bottom, var(--color-bg) 0%, var(--color-linen) 40%, var(--color-bg) 100%);
+}
+
+.head {
+	max-width: 44rem;
+	margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.title {
+	margin-top: 0.9rem;
+	font-size: clamp(1.9rem, 4.2vw, 2.8rem);
+	font-weight: 400;
+	text-wrap: balance;
+}
+
+.layout {
+	display: grid;
+	gap: clamp(1.5rem, 3vw, 2.5rem);
+	align-items: stretch;
+	grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+}
+
+.info {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1.75rem;
+	padding: clamp(1.5rem, 3vw, 2rem);
+	border-radius: 26px;
+	background: var(--surface-glass);
+	border: 1px solid var(--border-glass);
+	box-shadow: 0 26px 55px -40px rgba(30, 25, 22, 0.55);
+	backdrop-filter: blur(18px) saturate(150%);
+	-webkit-backdrop-filter: blur(18px) saturate(150%);
+}
+
+.details {
+	display: grid;
+	gap: 1.1rem;
+	margin: 0;
+	width: 100%;
+}
+
+.detail {
+	display: grid;
+	gap: 0.2rem;
+}
+
+.detail dt {
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--color-desert-beige);
+}
+
+.detail dd {
+	margin: 0;
+	font-size: 1rem;
+	color: var(--color-text);
+}
+
+.detail dd a {
+	border-bottom: 1px solid var(--border-soft);
+	transition:
+		border-color 0.3s ease,
+		color 0.3s ease;
+}
+
+.detail dd a:hover {
+	color: var(--color-desert-beige);
+	border-color: var(--color-desert-beige);
+}
+
+.routes {
+	display: grid;
+	gap: 0.85rem;
+	margin: 0;
+	padding: 1.15rem 1.25rem;
+	list-style: none;
+	width: 100%;
+	border-radius: 18px;
+	border: 1px solid var(--border-soft);
+	background: rgba(255, 255, 255, 0.4);
+}
+
+.routes li {
+	display: grid;
+	gap: 0.15rem;
+	font-size: 0.9rem;
+	color: var(--color-text-muted);
+}
+
+.routes strong {
+	font-weight: 500;
+	color: var(--color-text);
+}
+
+.cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: auto;
+	padding: 0.85rem 1.5rem;
+	border-radius: 999px;
+	border: 1px solid var(--color-ink);
+	background: var(--color-ink);
+	color: var(--color-on-dark);
+	font-size: 0.95rem;
+	font-weight: 500;
+	transition:
+		transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+		box-shadow 0.35s ease,
+		background-color 0.35s ease;
+}
+
+.cta:hover {
+	transform: translateY(-3px);
+	background: #322b26;
+	box-shadow: 0 18px 34px -18px rgba(30, 25, 22, 0.85);
+}
+
+/* Карта ---------------------------------------------------------------- */
+
+.card {
+	position: relative;
+	min-height: clamp(20rem, 46vw, 30rem);
+	border-radius: 26px;
+	overflow: hidden;
+	border: 1px solid var(--border-glass);
+	background: var(--color-linen);
+	box-shadow: 0 30px 60px -38px rgba(30, 25, 22, 0.6);
+}
+
+/* Собственный stacking context: внутренние z-index яндекса наружу не лезут. */
+.canvas {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+}
+
+.fallback {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-end;
+	gap: 0.35rem;
+	padding: clamp(1.25rem, 3vw, 2rem);
+	background: radial-gradient(70% 60% at 20% 10%, rgba(232, 213, 158, 0.45), transparent 70%), var(--color-champagne);
+}
+
+.fallback[data-state="ready"],
+.fallback[hidden] {
+	display: none;
+}
+
+/* В состоянии ошибки держим текст по центру — панель не выглядит пустой. */
+.fallback[data-state="error"] {
+	justify-content: center;
+}
+
+.fallbackTitle {
+	font-family: "Playfair Display", Georgia, serif;
+	font-size: 1.15rem;
+}
+
+.fallbackText {
+	font-size: 0.95rem;
+	color: var(--color-ink-soft);
+}
+
+.fallbackLink {
+	margin-top: 0.5rem;
+	font-size: 0.9rem;
+	color: var(--color-text);
+	border-bottom: 1px solid var(--color-desert-beige);
+	transition: color 0.3s ease;
+}
+
+.fallbackLink:hover {
+	color: var(--color-desert-beige);
+}
+
+.controls {
+	position: absolute;
+	z-index: 2;
+	right: clamp(0.75rem, 2vw, 1.1rem);
+	bottom: clamp(0.75rem, 2vw, 1.1rem);
+	display: grid;
+	gap: 0.4rem;
+}
+
+/* Кнопки не нужны ни пока карта грузится, ни если она не загрузилась. */
+.controls[hidden] {
+	display: none;
+}
+
+.control {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.35rem;
+	height: 2.35rem;
+	padding: 0;
+	border-radius: 50%;
+	border: 1px solid var(--border-glass);
+	background: rgba(251, 249, 242, 0.82);
+	color: var(--color-text);
+	cursor: pointer;
+	backdrop-filter: blur(14px) saturate(150%);
+	-webkit-backdrop-filter: blur(14px) saturate(150%);
+	box-shadow: 0 10px 22px -14px rgba(30, 25, 22, 0.7);
+	transition:
+		transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+		background-color 0.28s ease,
+		color 0.28s ease;
+}
+
+.control svg {
+	width: 0.8rem;
+}
+
+.control:hover {
+	transform: translateY(-2px);
+	background: var(--color-light-gold);
+}
+
+.control:active {
+	transform: none;
+}
+
+/* Метка зала: разметку создаёт Яндекс во время работы, поэтому классы
+   не модульные — наружу отдаём только через :global. */
+:global(.versal-pin) {
+	position: relative;
+	width: 1.5rem;
+	height: 1.5rem;
+	transform: translate(-50%, -50%);
+}
+
+:global(.versal-pin__dot) {
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	background: var(--color-light-gold);
+	border: 2px solid var(--color-casual-white);
+	box-shadow: 0 6px 14px -4px rgba(30, 25, 22, 0.65);
+}
+
+:global(.versal-pin__pulse) {
+	position: absolute;
+	inset: -0.5rem;
+	border-radius: 50%;
+	background: rgba(232, 213, 158, 0.8);
+	animation: pinPulse 2.6s ease-out infinite;
+}
+
+@keyframes pinPulse {
+	0% {
+		transform: scale(0.5);
+	}
+	70%,
+	100% {
+		transform: scale(1.5);
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:global(.versal-pin__pulse) {
+		animation: none;
+		opacity: 0.45;
+	}
+}
+
+@media (max-width: 900px) {
+	.layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.cta {
+		margin-top: 0.25rem;
+	}
+}

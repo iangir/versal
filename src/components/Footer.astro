@@ -1,0 +1,61 @@
+---
+import { maxUrl, venue, vkUrl } from '../constants/contact';
+import styles from './Footer.module.css';
+import MaxIcon from './icons/max.astro';
+import VkIcon from './icons/vk.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class={styles.footer}>
+	<div class={styles.glow} aria-hidden='true'></div>
+
+	<div class='container'>
+		<div class={styles.top}>
+			<div>
+				<p class={styles.brand}>Версаль</p>
+				<p class={styles.tagline}>Банкетный зал для сдней, которые запомнятся.</p>
+			</div>
+
+			<div>
+				<p class={styles.heading}>Связаться с нами</p>
+				<ul class={styles.list}>
+					<li><a href={venue.phoneHref}>{venue.phone}</a></li>
+					<li class={styles.social}>
+						<a target='_blank' rel='noopener' href={vkUrl}
+							><VkIcon />
+							<span class='visually-hidden'>Ссылка на VK</span>
+						</a>
+						<a target='_blank' rel='noopener' href={maxUrl}
+							><MaxIcon /><span class='visually-hidden'>Ссылка на Max</span>
+						</a>
+					</li>
+					<li><a href='#map'><address>{venue.address}</address></a></li>
+				</ul>
+			</div>
+
+			<div>
+				<p class={styles.heading}>Когда открыты</p>
+				<ul class={styles.list}>
+					{
+						venue.hours.map((slot) => (
+							<li>
+								<span>
+									{slot.days} · {slot.time}
+								</span>
+							</li>
+						))
+					}
+					<li><a href='#booking'>Записаться на просмотр</a></li>
+				</ul>
+			</div>
+		</div>
+
+		<div class={styles.bottom}>
+			<p>&copy; {year} Версаль, банкетный зал. Все права защищены.</p>
+			<a class={styles.topLink} href='#top'>
+				Наверх <span aria-hidden='true'>&uarr;</span>
+			</a>
+		</div>
+	</div>
+</footer>

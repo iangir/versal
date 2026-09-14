@@ -1,0 +1,442 @@
+---
+import formStyles from '../../styles/form.module.css';
+import styles from './DatePicker.module.css';
+
+interface Props {
+  name: string;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+}
+
+const {
+  name,
+  label,
+  placeholder = 'Выберите дату',
+  required = false,
+} = Astro.props;
+
+const triggerId = `${name}-trigger`;
+const panelId = `${name}-calendar`;
+---
+
+<div class:list={[formStyles.field, styles.field]} data-field>
+  <label class={formStyles.label} id={`${name}-label`} for={triggerId}>
+    {label}
+  </label>
+
+  <input
+    type="hidden"
+    name={name}
+    id={name}
+    data-custom-input
+    required={required}
+  />
+
+  <div class={styles.wrap} data-datepicker data-open="false">
+    <button
+      type="button"
+      id={triggerId}
+      class={formStyles.trigger}
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-controls={panelId}
+      aria-labelledby={`${name}-label`}
+      data-dp-trigger
+    >
+      <span
+        class={styles.value}
+        data-dp-value
+        data-placeholder={placeholder}
+        data-empty="true">{placeholder}</span
+      >
+      <svg class={styles.icon} viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <rect
+          x="2.75"
+          y="4.25"
+          width="14.5"
+          height="13"
+          rx="3"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"></rect>
+        <path
+          d="M2.75 8.25h14.5M6.75 2.5v3M13.25 2.5v3"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"></path>
+      </svg>
+    </button>
+
+    <div
+      class={styles.panel}
+      id={panelId}
+      role="dialog"
+      aria-modal="false"
+      aria-label="Календарь"
+      hidden
+      data-dp-panel
+    >
+      <div class={styles.head}>
+        <button
+          type="button"
+          class={styles.nav}
+          aria-label="Предыдущий месяц"
+          data-dp-prev
+        >
+          <svg viewBox="0 0 8 12" aria-hidden="true" focusable="false">
+            <path
+              d="M6.5 1 1.5 6l5 5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </button>
+
+        <p class={styles.month} data-dp-label aria-live="polite"></p>
+
+        <button
+          type="button"
+          class={styles.nav}
+          aria-label="Следующий месяц"
+          data-dp-next
+        >
+          <svg viewBox="0 0 8 12" aria-hidden="true" focusable="false">
+            <path
+              d="M1.5 1l5 5-5 5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class={styles.weekdays} data-dp-weekdays aria-hidden="true"></div>
+
+      <div class={styles.days} role="grid" data-dp-days></div>
+
+      <div class={styles.foot}>
+        <button type="button" class={styles.link} data-dp-today>Сегодня</button>
+        <button type="button" class={styles.link} data-dp-clear>Очистить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ISO = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+      date.getDate(),
+    ).padStart(2, '0')}`;
+
+  const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+  document.querySelectorAll<HTMLElement>('[data-datepicker]').forEach((root) => {
+    const trigger = root.querySelector<HTMLButtonElement>('[data-dp-trigger]');
+    const panel = root.querySelector<HTMLElement>('[data-dp-panel]');
+    const valueEl = root.querySelector<HTMLElement>('[data-dp-value]');
+    const monthEl = root.querySelector<HTMLElement>('[data-dp-label]');
+    const weekdaysEl = root.querySelector<HTMLElement>('[data-dp-weekdays]');
+    const daysEl = root.querySelector<HTMLElement>('[data-dp-days]');
+    const input = root
+      .closest<HTMLElement>('[data-field]')
+      ?.querySelector<HTMLInputElement>('input[data-custom-input]');
+
+    if (!trigger || !panel || !valueEl || !monthEl || !weekdaysEl || !daysEl || !input) return;
+
+    const locale = 'ru-RU';
+    const placeholder = valueEl.dataset.placeholder ?? '';
+    const full = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    const monthOnly = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
+    const dayLabel = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      weekday: 'long',
+    });
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    let view = new Date(startOfToday.getFullYear(), startOfToday.getMonth(), 1);
+    let focusDate = new Date(startOfToday);
+    let selectedISO = '';
+
+    const parseISO = (value: string) => {
+      const [y, m, d] = value.split('-').map(Number);
+      if (!y || !m || !d) return null;
+      return new Date(y, m - 1, d);
+    };
+
+    const isPast = (date: Date) => date.getTime() < startOfToday.getTime();
+    const isSameDay = (a: Date, b: Date) =>
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+
+    // Weekday header, Monday-first.
+    const weekdayFmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+    weekdaysEl.replaceChildren(
+      ...Array.from({ length: 7 }, (_, i) => {
+        const span = document.createElement('span');
+        span.textContent = capitalize(
+          weekdayFmt.format(new Date(2024, 0, 1 + i)).replace('.', ''),
+        );
+        return span;
+      }),
+    );
+
+    const dayButton = (date: Date, currentMonth: boolean) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.day = 'true';
+      button.dataset.date = ISO(date);
+      button.dataset.month = currentMonth ? 'current' : 'outside';
+      button.setAttribute('role', 'gridcell');
+      button.setAttribute('aria-label', capitalize(dayLabel.format(date)));
+      button.textContent = String(date.getDate());
+
+      if (isPast(date)) {
+        button.disabled = true;
+        button.dataset.past = 'true';
+      }
+      if (isSameDay(date, startOfToday)) button.dataset.today = 'true';
+      if (ISO(date) === selectedISO) button.setAttribute('aria-selected', 'true');
+      button.tabIndex = isSameDay(date, focusDate) ? 0 : -1;
+
+      return button;
+    };
+
+    const render = () => {
+      monthEl.textContent = capitalize(monthOnly.format(view));
+
+      const year = view.getFullYear();
+      const month = view.getMonth();
+      const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7; // Monday = 0
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const cells = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
+
+      const nodes: HTMLElement[] = [];
+
+      for (let i = 0; i < firstWeekday; i += 1) {
+        const blank = document.createElement('span');
+        blank.className = 'blank';
+        blank.dataset.blank = 'true';
+        blank.setAttribute('aria-hidden', 'true');
+        nodes.push(blank);
+      }
+
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        nodes.push(dayButton(new Date(year, month, day), true));
+      }
+
+      for (let i = firstWeekday + daysInMonth; i < cells; i += 1) {
+        const blank = document.createElement('span');
+        blank.dataset.blank = 'true';
+        blank.setAttribute('aria-hidden', 'true');
+        nodes.push(blank);
+      }
+
+      daysEl.replaceChildren(...nodes);
+    };
+
+    const focusDay = (date: Date) => {
+      focusDate = date;
+      if (
+        date.getMonth() !== view.getMonth() ||
+        date.getFullYear() !== view.getFullYear()
+      ) {
+        view = new Date(date.getFullYear(), date.getMonth(), 1);
+      }
+      render();
+      daysEl
+        .querySelector<HTMLButtonElement>(`[data-date="${ISO(date)}"]`)
+        ?.focus();
+    };
+
+    const isOpen = () => root.dataset.open === 'true';
+
+    const openPanel = () => {
+      panel.hidden = false;
+      root.dataset.open = 'true';
+      trigger.setAttribute('aria-expanded', 'true');
+      const selected = parseISO(selectedISO);
+      focusDate = selected && !isPast(selected) ? selected : new Date(startOfToday);
+      view = new Date(focusDate.getFullYear(), focusDate.getMonth(), 1);
+      render();
+      daysEl.querySelector<HTMLButtonElement>('[tabindex="0"]')?.focus();
+    };
+
+    const closePanel = (refocus = false) => {
+      panel.hidden = true;
+      root.dataset.open = 'false';
+      trigger.setAttribute('aria-expanded', 'false');
+      if (refocus) trigger.focus();
+    };
+
+    const commit = (date: Date) => {
+      selectedISO = ISO(date);
+      input.value = selectedISO;
+      valueEl.textContent = capitalize(full.format(date));
+      delete valueEl.dataset.empty;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      closePanel(true);
+    };
+
+    const clear = () => {
+      selectedISO = '';
+      input.value = '';
+      valueEl.textContent = placeholder;
+      valueEl.dataset.empty = 'true';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      render();
+    };
+
+    /** Keep the visible label in sync with the hidden input (init + form.reset()). */
+    const sync = () => {
+      const parsed = input.value ? parseISO(input.value) : null;
+      selectedISO = parsed ? input.value : '';
+      if (parsed) {
+        valueEl.textContent = capitalize(full.format(parsed));
+        delete valueEl.dataset.empty;
+      } else {
+        valueEl.textContent = placeholder;
+        valueEl.dataset.empty = 'true';
+      }
+      focusDate = parsed ?? new Date(startOfToday);
+      view = new Date(focusDate.getFullYear(), focusDate.getMonth(), 1);
+      render();
+    };
+
+    input.addEventListener('input', sync);
+    input.form?.addEventListener('reset', () => {
+      window.setTimeout(() => {
+        // У скрытого input значение по умолчанию берётся из атрибута,
+        // поэтому очищаем его явно — иначе reset вернёт прежнюю дату.
+        input.value = '';
+        sync();
+      }, 0);
+    });
+    sync();
+
+    trigger.addEventListener('click', () => {
+      if (isOpen()) closePanel();
+      else openPanel();
+    });
+
+    trigger.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && isOpen()) {
+        event.preventDefault();
+        closePanel();
+        return;
+      }
+      if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        if (!isOpen()) openPanel();
+      }
+    });
+
+    root.querySelector('[data-dp-prev]')?.addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+      render();
+    });
+
+    root.querySelector('[data-dp-next]')?.addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+      render();
+    });
+
+    root.querySelector('[data-dp-today]')?.addEventListener('click', () => {
+      focusDay(new Date(startOfToday));
+      commit(new Date(startOfToday));
+    });
+
+    root.querySelector('[data-dp-clear]')?.addEventListener('click', clear);
+
+    daysEl.addEventListener('click', (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-date]');
+      if (!button || button.disabled) return;
+      const parsed = parseISO(button.dataset.date ?? '');
+      if (parsed) commit(parsed);
+    });
+
+    daysEl.addEventListener('keydown', (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-date]');
+      if (!button) return;
+      const parsed = parseISO(button.dataset.date ?? '');
+      if (!parsed) return;
+
+      const step = (days: number) => {
+        const next = new Date(parsed);
+        next.setDate(next.getDate() + days);
+        if (isPast(next)) return;
+        event.preventDefault();
+        focusDay(next);
+      };
+
+      switch (event.key) {
+        case 'ArrowRight':
+          step(1);
+          break;
+        case 'ArrowLeft':
+          step(-1);
+          break;
+        case 'ArrowDown':
+          step(7);
+          break;
+        case 'ArrowUp':
+          step(-7);
+          break;
+        case 'Home': {
+          event.preventDefault();
+          const delta = -((parsed.getDay() + 6) % 7);
+          if (delta < 0 && !isPast(new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate() + delta))) {
+            focusDay(new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate() + delta));
+          }
+          break;
+        }
+        case 'End': {
+          event.preventDefault();
+          const delta = 6 - ((parsed.getDay() + 6) % 7);
+          const target = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate() + delta);
+          if (delta > 0 && !isPast(target)) focusDay(target);
+          break;
+        }
+        case 'PageUp':
+          event.preventDefault();
+          focusDay(new Date(parsed.getFullYear(), parsed.getMonth() - 1, parsed.getDate()));
+          break;
+        case 'PageDown':
+          event.preventDefault();
+          focusDay(new Date(parsed.getFullYear(), parsed.getMonth() + 1, parsed.getDate()));
+          break;
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          commit(parsed);
+          break;
+        case 'Escape':
+          event.preventDefault();
+          closePanel(true);
+          break;
+        default:
+          break;
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!isOpen()) return;
+      if (event.target instanceof Node && root.contains(event.target)) return;
+      closePanel();
+    });
+  });
+</script>
