@@ -117,7 +117,7 @@
 }
 
 .title em {
-	font-style: italic;
+	font-style: normal;
 	color: var(--color-champagne);
 }
 
@@ -219,41 +219,6 @@
 	height: 5px;
 	border-radius: 50%;
 	background: var(--color-rose-gold);
-}
-
-.scrollCue {
-	position: absolute;
-	left: 50%;
-	bottom: 1.75rem;
-	transform: translateX(-50%);
-	display: inline-flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.5rem;
-	font-size: 0.7rem;
-	letter-spacing: 0.22em;
-	text-transform: uppercase;
-	color: rgba(251, 249, 242, 0.7);
-}
-
-.scrollCue span {
-	width: 1px;
-	height: 2.75rem;
-	background: linear-gradient(to bottom, rgba(251, 249, 242, 0.7), transparent);
-	animation: cue 2.4s ease-in-out infinite;
-	transform-origin: top;
-}
-
-@keyframes cue {
-	0%,
-	100% {
-		transform: scaleY(0.45);
-		opacity: 0.5;
-	}
-	50% {
-		transform: scaleY(1);
-		opacity: 1;
-	}
 }
 
 @media (max-width: 640px) {

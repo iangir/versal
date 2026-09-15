@@ -1,0 +1,29 @@
+/**
+ * Локальные шрифты: woff2, вариативные, из public/fonts.
+ *
+ *   playfair-display-variable.woff2 — заголовки, ось wght 400–900
+ *   inter-variable.woff2            — текст и интерфейс, оси wght 100–900 и opsz 14–32
+ *
+ * Оба файла содержат кириллицу, поэтому русский текст рисуется ими же,
+ * а не системным запасным шрифтом. Курсив не подключён — в дизайне его нет,
+ * поэтому файла с курсивом в проекте тоже нет.
+ *
+ * Оптический размер Inter (ось opsz) браузер подставляет сам:
+ * font-optical-sizing: auto действует по умолчанию.
+ */
+
+@font-face {
+	font-family: 'Playfair Display';
+	src: url('/fonts/playfair-display-variable.woff2') format('woff2');
+	font-weight: 400 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Inter';
+	src: url('/fonts/inter-variable.woff2') format('woff2');
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+}
