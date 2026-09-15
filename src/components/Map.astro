@@ -1,6 +1,8 @@
 ---
 import styles from './Map.module.css';
-import { venue, mapsUrl } from '../constants/contact';
+import { maxUrl, venue, vkUrl, mapsUrl } from '../constants/contact';
+import MaxIcon from './icons/max.astro';
+import VkIcon from './icons/vk.astro';
 
 /**
  * Ключ Яндекс Карт — публичный по своей природе, поэтому читаем его из
@@ -11,230 +13,275 @@ import { venue, mapsUrl } from '../constants/contact';
 const apiKey = import.meta.env.PUBLIC_YANDEX_MAPS_API_KEY ?? '';
 ---
 
-<section class={styles.map} id="map" aria-labelledby="map-title">
-  <div class="container">
-    <header class={styles.head} data-reveal>
-      <p class="eyebrow">Как нас найти</p>
-      <h2 class={styles.title} id="map-title">
+<section class={styles.map} id='map' aria-labelledby='map-title'>
+	<div class='container'>
+		<header class={styles.head} data-reveal>
+			<p class='eyebrow'>Связаться с нами</p>
+			<!-- <h2 class={styles.title} id="map-title">
         Заходите посмотреть зал — до праздника, а не в день праздника.
-      </h2>
-    </header>
+      </h2> -->
+		</header>
 
-    <div class={styles.layout}>
-      <div class={styles.info} data-reveal>
-        <dl class={styles.details}>
-          <div class={styles.detail}>
-            <dt>Адрес</dt>
-            <dd>{venue.address}</dd>
-          </div>
-          <div class={styles.detail}>
-            <dt>Часы работы</dt>
-            <dd>
-              {venue.hours.map((slot) => `${slot.days} · ${slot.time}`).join(' / ')}
-            </dd>
-          </div>
-          <div class={styles.detail}>
-            <dt>Телефон</dt>
-            <dd><a href={venue.phoneHref}>{venue.phone}</a></dd>
-          </div>
-        </dl>
+		<div class={styles.layout}>
+			<div class={styles.info} data-reveal>
+				<dl class={styles.details}>
+					<div class={styles.detail}>
+						<dt>Напишите нам</dt>
+						<dd class={styles.social}>
+							<a target='_blank' rel='noopener' href={vkUrl}>
+								<VkIcon />
+								<span class='visually-hidden'>Ссылка на VK</span>
+							</a>
+							<a target='_blank' rel='noopener' href={maxUrl}>
+								<MaxIcon />
+								<span class='visually-hidden'>Ссылка на Max</span>
+							</a>
+						</dd>
+					</div>
+					<div class={styles.detail}>
+						<dt>Телефон</dt>
+						<dd><a href={venue.phoneHref}>{venue.phone}</a></dd>
+					</div>
+					<div class={styles.detail}>
+						<dt>Адрес</dt>
+						<dd><address>{venue.address}</address></dd>
+					</div>
+					<div class={styles.detail}>
+						<dt>Часы работы</dt>
+						<dd>
+							{venue.hours.map((slot) => `${slot.days} · ${slot.time}`).join(' / ')}
+						</dd>
+					</div>
+				</dl>
 
-        <a class={styles.cta} href={mapsUrl} target="_blank" rel="noopener noreferrer">
-          Открыть в Яндекс Картах
-          <span aria-hidden="true">&rarr;</span>
-        </a>
-      </div>
+				<a class={styles.cta} href={mapsUrl} target='_blank' rel='noopener noreferrer'>
+					Открыть в Яндекс Картах
+					<span aria-hidden='true'>&rarr;</span>
+				</a>
+			</div>
 
-      <div class={styles.card} data-map-card data-reveal style="--reveal-delay: 120ms">
-        <div
-          class={styles.canvas}
-          data-map
-          data-lat={venue.coordinates.lat}
-          data-lon={venue.coordinates.lon}
-          data-zoom={venue.mapZoom}
-          data-apikey={apiKey}
-          data-title={`${venue.name} — ${venue.kind}`}
-          data-address={venue.address}
-        >
-        </div>
+			<div class={styles.card} data-map-card data-reveal style='--reveal-delay: 120ms'>
+				<div
+					class={styles.canvas}
+					data-map
+					data-lat={venue.coordinates.lat}
+					data-lon={venue.coordinates.lon}
+					data-zoom={venue.mapZoom}
+					data-apikey={apiKey}
+					data-title={`${venue.name} — ${venue.kind}`}
+					data-address={venue.address}
+				>
+				</div>
 
-        <div class={styles.fallback} data-map-fallback data-state="loading">
-          <p class={styles.fallbackTitle} data-map-loading>Загружаем карту…</p>
-          <p class={styles.fallbackTitle} data-map-error hidden>
-            Карта не загрузилась
-          </p>
-          <p class={styles.fallbackText}>{venue.address}</p>
-          <a class={styles.fallbackLink} href={mapsUrl} target="_blank" rel="noopener noreferrer">
-            Открыть в Яндекс Картах
-          </a>
-        </div>
+				<div class={styles.fallback} data-map-fallback data-state='loading'>
+					<p class={styles.fallbackTitle} data-map-loading>Загружаем карту…</p>
+					<p class={styles.fallbackTitle} data-map-error hidden>Карта не загрузилась</p>
+					<p class={styles.fallbackText}>{venue.address}</p>
+					<a
+						class={styles.fallbackLink}
+						href={mapsUrl}
+						target='_blank'
+						rel='noopener noreferrer'
+					>
+						Открыть в Яндекс Картах
+					</a>
+				</div>
 
-        <div class={styles.controls} data-map-controls hidden>
-          <button
-            class={styles.control}
-            type="button"
-            data-map-zoom="in"
-            aria-label="Приблизить карту"
-          >
-            <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-              <path d="M6 1v10M1 6h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-            </svg>
-          </button>
-          <button
-            class={styles.control}
-            type="button"
-            data-map-zoom="out"
-            aria-label="Отдалить карту"
-          >
-            <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-              <path d="M1 6h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-            </svg>
-          </button>
-          <button
-            class={styles.control}
-            type="button"
-            data-map-reset
-            aria-label="Показать зал на карте"
-          >
-            <svg viewBox="0 0 14 14" aria-hidden="true" focusable="false">
-              <circle cx="7" cy="7" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
-              <path d="M7 1v2.2M7 10.8V13M1 7h2.2M10.8 7H13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+				<div class={styles.controls} data-map-controls hidden>
+					<button
+						class={styles.control}
+						type='button'
+						data-map-zoom='in'
+						aria-label='Приблизить карту'
+					>
+						<svg viewBox='0 0 12 12' aria-hidden='true' focusable='false'>
+							<path
+								d='M6 1v10M1 6h10'
+								fill='none'
+								stroke='currentColor'
+								stroke-width='1.5'
+								stroke-linecap='round'></path>
+						</svg>
+					</button>
+					<button
+						class={styles.control}
+						type='button'
+						data-map-zoom='out'
+						aria-label='Отдалить карту'
+					>
+						<svg viewBox='0 0 12 12' aria-hidden='true' focusable='false'>
+							<path
+								d='M1 6h10'
+								fill='none'
+								stroke='currentColor'
+								stroke-width='1.5'
+								stroke-linecap='round'></path>
+						</svg>
+					</button>
+					<button
+						class={styles.control}
+						type='button'
+						data-map-reset
+						aria-label='Показать зал на карте'
+					>
+						<svg viewBox='0 0 14 14' aria-hidden='true' focusable='false'>
+							<circle
+								cx='7'
+								cy='7'
+								r='2.4'
+								fill='none'
+								stroke='currentColor'
+								stroke-width='1.5'></circle>
+							<path
+								d='M7 1v2.2M7 10.8V13M1 7h2.2M10.8 7H13'
+								fill='none'
+								stroke='currentColor'
+								stroke-width='1.5'
+								stroke-linecap='round'></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>
 
 <script>
-  const API_SRC = 'https://api-maps.yandex.ru/2.1/';
-  const PIN_CLASS = 'versal-pin';
+	const API_SRC = 'https://api-maps.yandex.ru/2.1/';
+	const PIN_CLASS = 'versal-pin';
 
-  let apiPromise: Promise<any> | null = null;
+	let apiPromise: Promise<any> | null = null;
 
-  /** Подключаем API один раз и только когда секция доехала до экрана. */
-  const loadApi = (apiKey: string): Promise<any> => {
-    if (apiPromise) return apiPromise;
+	/** Подключаем API один раз и только когда секция доехала до экрана. */
+	const loadApi = (apiKey: string): Promise<any> => {
+		if (apiPromise) return apiPromise;
 
-    apiPromise = new Promise((resolve, reject) => {
-      const finish = () =>
-        (window as any).ymaps
-          ? (window as any).ymaps.ready(() => resolve((window as any).ymaps))
-          : reject(new Error('ymaps is unavailable'));
+		apiPromise = new Promise((resolve, reject) => {
+			const finish = () =>
+				(window as any).ymaps
+					? (window as any).ymaps.ready(() => resolve((window as any).ymaps))
+					: reject(new Error('ymaps is unavailable'));
 
-      if ((window as any).ymaps) {
-        finish();
-        return;
-      }
+			if ((window as any).ymaps) {
+				finish();
+				return;
+			}
 
-      const script = document.createElement('script');
-      script.src = `${API_SRC}?lang=ru_RU${apiKey ? `&apikey=${encodeURIComponent(apiKey)}` : ''}`;
-      script.async = true;
-      script.onload = finish;
-      script.onerror = () => reject(new Error('failed to load the Yandex Maps API'));
-      document.head.appendChild(script);
+			const script = document.createElement('script');
+			script.src = `${API_SRC}?lang=ru_RU${apiKey ? `&apikey=${encodeURIComponent(apiKey)}` : ''}`;
+			script.async = true;
+			script.onload = finish;
+			script.onerror = () => reject(new Error('failed to load the Yandex Maps API'));
+			document.head.appendChild(script);
 
-      // Страховка на случай, если сеть отвалится без события error.
-      window.setTimeout(() => {
-        if (!(window as any).ymaps) reject(new Error('timed out'));
-      }, 12000);
-    });
+			// Страховка на случай, если сеть отвалится без события error.
+			window.setTimeout(() => {
+				if (!(window as any).ymaps) reject(new Error('timed out'));
+			}, 12000);
+		});
 
-    return apiPromise;
-  };
+		return apiPromise;
+	};
 
-  document.querySelectorAll<HTMLElement>('[data-map]').forEach((canvas) => {
-    const card = canvas.closest<HTMLElement>('[data-map-card]') ?? canvas.parentElement;
-    const fallback = card?.querySelector<HTMLElement>('[data-map-fallback]');
-    const loadingText = fallback?.querySelector<HTMLElement>('[data-map-loading]');
-    const errorText = fallback?.querySelector<HTMLElement>('[data-map-error]');
-    const controls = card?.querySelector<HTMLElement>('[data-map-controls]');
+	document.querySelectorAll<HTMLElement>('[data-map]').forEach((canvas) => {
+		const card = canvas.closest<HTMLElement>('[data-map-card]') ?? canvas.parentElement;
+		const fallback = card?.querySelector<HTMLElement>('[data-map-fallback]');
+		const loadingText = fallback?.querySelector<HTMLElement>('[data-map-loading]');
+		const errorText = fallback?.querySelector<HTMLElement>('[data-map-error]');
+		const controls = card?.querySelector<HTMLElement>('[data-map-controls]');
 
-    const lat = Number(canvas.dataset.lat);
-    const lon = Number(canvas.dataset.lon);
-    const zoom = Number(canvas.dataset.zoom) || 16;
-    const apiKey = canvas.dataset.apikey ?? '';
+		const lat = Number(canvas.dataset.lat);
+		const lon = Number(canvas.dataset.lon);
+		const zoom = Number(canvas.dataset.zoom) || 16;
+		const apiKey = canvas.dataset.apikey ?? '';
 
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+		if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
 
-    const fail = () => {
-      if (!fallback) return;
-      fallback.dataset.state = 'error';
-      if (loadingText) loadingText.hidden = true;
-      if (errorText) errorText.hidden = false;
-    };
+		const fail = () => {
+			if (!fallback) return;
+			fallback.dataset.state = 'error';
+			if (loadingText) loadingText.hidden = true;
+			if (errorText) errorText.hidden = false;
+		};
 
-    const start = () => {
-      loadApi(apiKey)
-        .then((ymaps) => {
-          const map = new ymaps.Map(
-            canvas,
-            {
-              center: [lat, lon],
-              zoom,
-              type: 'yandex#map',
-              // Свои кнопки вместо стандартных; колёсико страницу не перехватывает.
-              controls: [],
-              behaviors: ['drag', 'dblClickZoom', 'multiTouch', 'rightMouseButtonMagnifier'],
-            },
-            { suppressMapOpenBlock: true, yandexMapDisablePoiInteractivity: true },
-          );
+		const start = () => {
+			loadApi(apiKey)
+				.then((ymaps) => {
+					const map = new ymaps.Map(
+						canvas,
+						{
+							center: [lat, lon],
+							zoom,
+							type: 'yandex#map',
+							// Свои кнопки вместо стандартных; колёсико страницу не перехватывает.
+							controls: [],
+							behaviors: [
+								'drag',
+								'dblClickZoom',
+								'multiTouch',
+								'rightMouseButtonMagnifier',
+							],
+						},
+						{ suppressMapOpenBlock: true, yandexMapDisablePoiInteractivity: true },
+					);
 
-          const pinLayout = ymaps.templateLayoutFactory.createClass(
-            `<div class="${PIN_CLASS}"><span class="${PIN_CLASS}__pulse"></span><span class="${PIN_CLASS}__dot"></span></div>`,
-          );
+					const pinLayout = ymaps.templateLayoutFactory.createClass(
+						`<div class="${PIN_CLASS}"><span class="${PIN_CLASS}__pulse"></span><span class="${PIN_CLASS}__dot"></span></div>`,
+					);
 
-          const placemark = new ymaps.Placemark(
-            [lat, lon],
-            {
-              hintContent: canvas.dataset.title ?? '',
-              balloonContentHeader: canvas.dataset.title ?? '',
-              balloonContentBody: canvas.dataset.address ?? '',
-            },
-            {
-              iconLayout: pinLayout,
-              iconShape: { type: 'Circle', coordinates: [0, 0], radius: 14 },
-            },
-          );
+					const placemark = new ymaps.Placemark(
+						[lat, lon],
+						{
+							hintContent: canvas.dataset.title ?? '',
+							balloonContentHeader: canvas.dataset.title ?? '',
+							balloonContentBody: canvas.dataset.address ?? '',
+						},
+						{
+							iconLayout: pinLayout,
+							iconShape: { type: 'Circle', coordinates: [0, 0], radius: 14 },
+						},
+					);
 
-          map.geoObjects.add(placemark);
+					map.geoObjects.add(placemark);
 
-          if (fallback) fallback.hidden = true;
-          if (controls) controls.hidden = false;
+					if (fallback) fallback.hidden = true;
+					if (controls) controls.hidden = false;
 
-          card?.querySelectorAll<HTMLButtonElement>('[data-map-zoom]').forEach((button) => {
-            button.addEventListener('click', () => {
-              const step = button.dataset.mapZoom === 'in' ? 1 : -1;
-              map.setZoom(map.getZoom() + step, { duration: 220 });
-            });
-          });
+					card?.querySelectorAll<HTMLButtonElement>('[data-map-zoom]').forEach(
+						(button) => {
+							button.addEventListener('click', () => {
+								const step = button.dataset.mapZoom === 'in' ? 1 : -1;
+								map.setZoom(map.getZoom() + step, { duration: 220 });
+							});
+						},
+					);
 
-          card
-            ?.querySelector<HTMLButtonElement>('[data-map-reset]')
-            ?.addEventListener('click', () => {
-              map.setCenter([lat, lon], zoom, { duration: 260 });
-              placemark.balloon.open();
-            });
-        })
-        .catch(fail);
-    };
+					card?.querySelector<HTMLButtonElement>('[data-map-reset]')?.addEventListener(
+						'click',
+						() => {
+							map.setCenter([lat, lon], zoom, { duration: 260 });
+							placemark.balloon.open();
+						},
+					);
+				})
+				.catch(fail);
+		};
 
-    // Карта грузится лениво: API подключается при подходе к секции.
-    if (!('IntersectionObserver' in window)) {
-      start();
-      return;
-    }
+		// Карта грузится лениво: API подключается при подходе к секции.
+		if (!('IntersectionObserver' in window)) {
+			start();
+			return;
+		}
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        observer.disconnect();
-        start();
-      },
-      { rootMargin: '250px 0px' },
-    );
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (!entries.some((entry) => entry.isIntersecting)) return;
+				observer.disconnect();
+				start();
+			},
+			{ rootMargin: '250px 0px' },
+		);
 
-    observer.observe(canvas);
-  });
+		observer.observe(canvas);
+	});
 </script>

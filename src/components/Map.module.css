@@ -75,6 +75,16 @@
 	border-color: var(--color-desert-beige);
 }
 
+.detail address {
+	font-style: normal;
+}
+
+.social {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
 .routes {
 	display: grid;
 	gap: 0.85rem;

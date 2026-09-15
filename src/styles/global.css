@@ -7,6 +7,38 @@
 html {
 	scroll-behavior: smooth;
 	-webkit-text-size-adjust: 100%;
+	scrollbar-width: thin;
+	scrollbar-color: var(--color-light-gold) transparent;
+}
+
+::-webkit-scrollbar {
+	width: 0.8rem;
+	height: 0.8rem;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
+::-webkit-scrollbar-button {
+	display: none;
+}
+
+::-webkit-scrollbar-thumb {
+	border: 3px solid transparent;
+	border-radius: 999px;
+	background-image: linear-gradient(180deg, var(--color-light-gold), var(--color-rose-gold));
+	background-clip: content-box;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-image: linear-gradient(180deg, var(--color-rose-gold), var(--color-desert-beige));
+}
+
+::-webkit-scrollbar-thumb:active {
+	background-image: linear-gradient(180deg, var(--color-desert-beige), var(--color-rose-gold));
 }
 
 body {
