@@ -3,6 +3,15 @@ import { paletteCssVars } from '../constants/palette';
 import '../styles/fonts.css';
 import '../styles/global.css';
 
+/**
+ * BASE_URL — это base из astro.config.mjs, причём без завершающего слэша
+ * ('/versal', не '/versal/'), поэтому нормализуем его сами.
+ * Файлы из public/ (шрифты, иконки) через сборщик не проходят, значит префикс
+ * нужно подставлять вручную — иначе на хостинге в подкаталоге они уедут в корень домена.
+ */
+const baseUrl = import.meta.env.BASE_URL;
+const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+
 interface Props {
 	title?: string;
 	description?: string;
@@ -22,19 +31,19 @@ const {
 		<meta name='generator' content={Astro.generator} />
 		<meta name='description' content={description} />
 		<meta name='theme-color' content='#FBF9F2' />
-		<link rel='icon' type='image/x-icon' href='/icons/favicon.ico' />
-		<link rel='icon' type='image/svg+xml' href='/icons/favicon.svg' />
+		<link rel='icon' type='image/x-icon' href={`${base}icons/favicon.ico`} />
+		<link rel='icon' type='image/svg+xml' href={`${base}icons/favicon.svg`} />
 		{/* Оба шрифта локальные — woff2 из public/fonts, см. styles/fonts.css. */}
 		<link
 			rel='preload'
-			href='/fonts/playfair-display-variable.woff2'
+			href={`${base}fonts/playfair-display-variable.woff2`}
 			as='font'
 			type='font/woff2'
 			crossorigin
 		/>
 		<link
 			rel='preload'
-			href='/fonts/inter-variable.woff2'
+			href={`${base}fonts/inter-variable.woff2`}
 			as='font'
 			type='font/woff2'
 			crossorigin
